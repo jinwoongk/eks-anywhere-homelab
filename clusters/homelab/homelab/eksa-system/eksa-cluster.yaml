@@ -1,0 +1,137 @@
+apiVersion: anywhere.eks.amazonaws.com/v1alpha1
+kind: Cluster
+metadata:
+  name: homelab
+  namespace: default
+spec:
+  clusterNetwork:
+    cni: cilium
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/20
+    services:
+      cidrBlocks:
+      - 10.96.0.0/12
+  controlPlaneConfiguration:
+    count: 1
+    endpoint:
+      host: 192.168.31.3
+    machineGroupRef:
+      kind: VSphereMachineConfig
+      name: homelab-cp
+  datacenterRef:
+    kind: VSphereDatacenterConfig
+    name: homelab
+  externalEtcdConfiguration:
+    count: 1
+    machineGroupRef:
+      kind: VSphereMachineConfig
+      name: homelab-etcd
+  gitOpsRef:
+    kind: GitOpsConfig
+    name: cluster-gitops
+  kubernetesVersion: "1.21"
+  managementCluster:
+    name: homelab
+  workerNodeGroupConfigurations:
+  - count: 2
+    machineGroupRef:
+      kind: VSphereMachineConfig
+      name: homelab
+    name: md-0
+
+---
+apiVersion: anywhere.eks.amazonaws.com/v1alpha1
+kind: VSphereDatacenterConfig
+metadata:
+  name: homelab
+  namespace: default
+spec:
+  datacenter: Datacenter
+  insecure: false
+  network: /Datacenter/network/VM Network
+  server: 192.168.31.2
+  thumbprint: 0E:89:91:5B:02:50:F6:41:D0:DE:6B:A0:B8:43:41:A4:81:03:93:F8
+
+---
+apiVersion: anywhere.eks.amazonaws.com/v1alpha1
+kind: VSphereMachineConfig
+metadata:
+  annotations:
+    anywhere.eks.amazonaws.com/etcd: "true"
+    anywhere.eks.amazonaws.com/managed-by: homelab
+  name: homelab-etcd
+  namespace: default
+spec:
+  datastore: /Datacenter/datastore/datastore2
+  diskGiB: 25
+  folder: /Datacenter/vm/cp
+  memoryMiB: 8192
+  numCPUs: 2
+  osFamily: bottlerocket
+  resourcePool: /Datacenter/host/192.168.31.121/Resources
+  template: /Datacenter/vm/Templates/bottlerocket-v1.21.5-kubernetes-1-21-eks-8-amd64-7dd3792
+  users:
+  - name: ec2-user
+    sshAuthorizedKeys:
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCbxuv7FpkLxaNK26cFS/VlUdEeT382NM09uaWrGKbYwqypiNZ55zHl8XqAYgjjHVwUd7MgDiCkqxpJZnL7tmkP4Nfg4TFDHxVDA7Vp8dV2A/zgcdC5EJNjDbPDtpTqLb4f/NlDaPxfjDtZWIBTwplDsxcCaLhVbDbfNjHVrOBmzTyCkVw9yd/2LxpqCkLsGlnEP3m6AqbZ0KKTVFFOZ32Yxn34ZD8ta0gnzs0AIF2L/lhJh93CrLTV4wl/Bh5Xu/EIZD11QNwJ0g+in/3vVeOFy/HIGQws4U7xftkzoNlIDjA3yYofOUrIVWoKPKQ5uQugkXSUKL5qdYummZD/V4u4twQT5Z4jtgPvZZw3TDqsvs+P0b11UnhX/imN6T4FKzMV4XT60dLpNcvy9+gN5i6i3zXC6v2hJTfNgo7PwVI7ht8Fi7d2TtVb/ZM2wZxDeBqiX6OlGU7TfLy6csRWnSL8uUmCbDDD3dEKKyt9vcQR/5kFHa7M4CYxK0KpJyLH3aU=
+
+---
+apiVersion: anywhere.eks.amazonaws.com/v1alpha1
+kind: VSphereMachineConfig
+metadata:
+  name: homelab
+  namespace: default
+spec:
+  datastore: /Datacenter/datastore/datastore2
+  diskGiB: 25
+  folder: /Datacenter/vm/cp
+  memoryMiB: 8192
+  numCPUs: 2
+  osFamily: bottlerocket
+  resourcePool: /Datacenter/host/192.168.31.121/Resources
+  template: /Datacenter/vm/Templates/bottlerocket-v1.21.5-kubernetes-1-21-eks-8-amd64-7dd3792
+  users:
+  - name: ec2-user
+    sshAuthorizedKeys:
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCbxuv7FpkLxaNK26cFS/VlUdEeT382NM09uaWrGKbYwqypiNZ55zHl8XqAYgjjHVwUd7MgDiCkqxpJZnL7tmkP4Nfg4TFDHxVDA7Vp8dV2A/zgcdC5EJNjDbPDtpTqLb4f/NlDaPxfjDtZWIBTwplDsxcCaLhVbDbfNjHVrOBmzTyCkVw9yd/2LxpqCkLsGlnEP3m6AqbZ0KKTVFFOZ32Yxn34ZD8ta0gnzs0AIF2L/lhJh93CrLTV4wl/Bh5Xu/EIZD11QNwJ0g+in/3vVeOFy/HIGQws4U7xftkzoNlIDjA3yYofOUrIVWoKPKQ5uQugkXSUKL5qdYummZD/V4u4twQT5Z4jtgPvZZw3TDqsvs+P0b11UnhX/imN6T4FKzMV4XT60dLpNcvy9+gN5i6i3zXC6v2hJTfNgo7PwVI7ht8Fi7d2TtVb/ZM2wZxDeBqiX6OlGU7TfLy6csRWnSL8uUmCbDDD3dEKKyt9vcQR/5kFHa7M4CYxK0KpJyLH3aU=
+
+---
+apiVersion: anywhere.eks.amazonaws.com/v1alpha1
+kind: VSphereMachineConfig
+metadata:
+  annotations:
+    anywhere.eks.amazonaws.com/control-plane: "true"
+  name: homelab-cp
+  namespace: default
+spec:
+  datastore: /Datacenter/datastore/datastore2
+  diskGiB: 25
+  folder: /Datacenter/vm/cp
+  memoryMiB: 8192
+  numCPUs: 2
+  osFamily: bottlerocket
+  resourcePool: /Datacenter/host/192.168.31.121/Resources
+  template: /Datacenter/vm/Templates/bottlerocket-v1.21.5-kubernetes-1-21-eks-8-amd64-7dd3792
+  users:
+  - name: ec2-user
+    sshAuthorizedKeys:
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCbxuv7FpkLxaNK26cFS/VlUdEeT382NM09uaWrGKbYwqypiNZ55zHl8XqAYgjjHVwUd7MgDiCkqxpJZnL7tmkP4Nfg4TFDHxVDA7Vp8dV2A/zgcdC5EJNjDbPDtpTqLb4f/NlDaPxfjDtZWIBTwplDsxcCaLhVbDbfNjHVrOBmzTyCkVw9yd/2LxpqCkLsGlnEP3m6AqbZ0KKTVFFOZ32Yxn34ZD8ta0gnzs0AIF2L/lhJh93CrLTV4wl/Bh5Xu/EIZD11QNwJ0g+in/3vVeOFy/HIGQws4U7xftkzoNlIDjA3yYofOUrIVWoKPKQ5uQugkXSUKL5qdYummZD/V4u4twQT5Z4jtgPvZZw3TDqsvs+P0b11UnhX/imN6T4FKzMV4XT60dLpNcvy9+gN5i6i3zXC6v2hJTfNgo7PwVI7ht8Fi7d2TtVb/ZM2wZxDeBqiX6OlGU7TfLy6csRWnSL8uUmCbDDD3dEKKyt9vcQR/5kFHa7M4CYxK0KpJyLH3aU=
+
+---
+apiVersion: anywhere.eks.amazonaws.com/v1alpha1
+kind: GitOpsConfig
+metadata:
+  name: cluster-gitops
+  namespace: default
+spec:
+  flux:
+    github:
+      branch: main
+      clusterConfigPath: clusters/homelab
+      fluxSystemNamespace: flux-system
+      owner: jinwoongk
+      personal: true
+      repository: eks-anywhere-homelab
+
+---
