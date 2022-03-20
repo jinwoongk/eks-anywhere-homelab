@@ -34,7 +34,7 @@ spec:
   managementCluster:
     name: homelab
   workerNodeGroupConfigurations:
-  - count: 3
+  - count: 2
     machineGroupRef:
       kind: VSphereMachineConfig
       name: homelab
